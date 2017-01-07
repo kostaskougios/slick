@@ -4,6 +4,7 @@ object Tables extends
 		val profile = slick.driver.H2Driver
 	} with demo.Tables
 
+import Tables._
 import Tables.profile.api._
 
 import scala.concurrent.Await

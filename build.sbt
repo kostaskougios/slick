@@ -13,12 +13,12 @@ libraryDependencies ++= List(
 
 slick <<= slickCodeGenTask // register manual sbt command
 
-sourceGenerators in Compile <+= slickCodeGenTask // register automatic code generation on every compile, remove for only manual use
+//sourceGenerators in Compile <+= slickCodeGenTask // register automatic code generation on every compile, remove for only manual use
 
 // code generation task
 lazy val slick = TaskKey[Seq[File]]("gen-tables")
-lazy val slickCodeGenTask = (sourceManaged, dependencyClasspath in Compile, runner in Compile, streams) map { (dir, cp, r, s) =>
-	val outputDir = (dir / "slick").getPath
+lazy val slickCodeGenTask = (sourceDirectory, dependencyClasspath in Compile, runner in Compile, streams) map { (dir, cp, r, s) =>
+	val outputDir = (dir / "main" / "scala").getPath
 	// place generated files in sbt's managed sources folder
 	val url = "jdbc:h2:mem:test;INIT=runscript from 'src/main/sql/create.sql'"
 	// connection info for a pre-populated throw-away, in-memory db for this demo, which is freshly initialized on every run
