@@ -19,13 +19,13 @@ slick <<= slickCodeGenTask // register manual sbt command
 lazy val slick = TaskKey[Seq[File]]("gen-tables")
 lazy val slickCodeGenTask = (sourceDirectory, dependencyClasspath in Compile, runner in Compile, streams) map { (dir, cp, r, s) =>
 	val outputDir = (dir / "main" / "scala").getPath
+	val url = "jdbc:postgresql://localhost/slick"
 	val username = "slick"
 	val password = "slick"
-	val url = "jdbc:postgresql://localhost/slick"
 	val jdbcDriver = "org.postgresql.Driver"
 	val slickDriver = "slick.driver.PostgresDriver"
 	val pkg = "demo"
-	toError(r.run("slick.codegen.SourceCodeGenerator", cp.files, Array(slickDriver, jdbcDriver, url, outputDir, pkg), s.log))
+	toError(r.run("slick.codegen.SourceCodeGenerator", cp.files, Array(slickDriver, jdbcDriver, url, outputDir, pkg, username, password), s.log))
 	val fname = outputDir + "/demo/Tables.scala"
 	Seq(file(fname))
 }
