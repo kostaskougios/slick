@@ -8,7 +8,7 @@ libraryDependencies ++= List(
 	"com.typesafe.slick" %% "slick" % slickVersion,
 	"com.typesafe.slick" %% "slick-codegen" % slickVersion,
 	"org.slf4j" % "slf4j-nop" % "1.7.19",
-	"com.h2database" % "h2" % "1.4.191"
+	"postgresql" % "postgresql" % "9.1-901-1.jdbc4"
 )
 
 slick <<= slickCodeGenTask // register manual sbt command
@@ -19,11 +19,11 @@ slick <<= slickCodeGenTask // register manual sbt command
 lazy val slick = TaskKey[Seq[File]]("gen-tables")
 lazy val slickCodeGenTask = (sourceDirectory, dependencyClasspath in Compile, runner in Compile, streams) map { (dir, cp, r, s) =>
 	val outputDir = (dir / "main" / "scala").getPath
-	// place generated files in sbt's managed sources folder
-	val url = "jdbc:h2:mem:test;INIT=runscript from 'src/main/sql/create.sql'"
-	// connection info for a pre-populated throw-away, in-memory db for this demo, which is freshly initialized on every run
-	val jdbcDriver = "org.h2.Driver"
-	val slickDriver = "slick.driver.H2Driver"
+	val username = "slick"
+	val password = "slick"
+	val url = "jdbc:postgresql://localhost/slick"
+	val jdbcDriver = "org.postgresql.Driver"
+	val slickDriver = "slick.driver.PostgresDriver"
 	val pkg = "demo"
 	toError(r.run("slick.codegen.SourceCodeGenerator", cp.files, Array(slickDriver, jdbcDriver, url, outputDir, pkg), s.log))
 	val fname = outputDir + "/demo/Tables.scala"
