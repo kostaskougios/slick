@@ -15,17 +15,23 @@ import scala.language.postfixOps
 object Example extends App
 {
 	// connection info for a pre-populated throw-away, in-memory db for this demo, which is freshly initialized on every run
-	val url = "jdbc:h2:mem:test;INIT=runscript from 'src/main/sql/create.sql'"
-	val db = Database.forURL(url, driver = "org.h2.Driver")
+	val url = "jdbc:postgresql://localhost/slick"
+	val db = Database.forURL(url, driver = "org.postgresql.Driver", user = "slick", password = "slick")
 
-	// Using generated code. Our Build.sbt makes sure they are generated before compilation.
-	val q = Companies.join(Computers).on(_.id === _.manufacturerId)
-		.map { case (co, cp) => (co.name, cp.name) }
+	val productAttributeQ = ProductAttribute.joinLeft(Attribute).on(_.attributeId === _.id)
 
-	Await.result(db.run(q.result).map { result =>
-		println(result.groupBy { case (co, cp) => co }
-			.mapValues(_.map { case (co, cp) => cp })
-			.mkString("\n")
-		)
-	}, 60 seconds)
+	val categoryQ = Category.joinLeft(ProductCategory).on(_.id === _.categoryId)
+		.joinLeft(Product).on(_.productId === _.id)
+		.joinLeft(productAttributeQ).on(_._2.id === _._1.productId)
+		.map {
+			case (((category, _), product), (_, attribute)) =>
+				(category.name, product.name, attribute.name)
+		}
+
+	Await.result(
+		db.run(categoryQ.result).map { result =>
+			println(result.mkString("\n"))
+		},
+		60 seconds
+	)
 }
